@@ -1,79 +1,55 @@
-const puppeteer = require("puppeteer");
+const link =
+  "https://www.google.com/maps/place/Swayambhunath,+Kathmandu+44600/@27.7153242,85.2882376,3a,75y,90t/data=!3m8!1e2!3m6!1sAF1QipMIvGehGur5uD9L-6jYweQhMKGngNPevK7_4aa_!2e10!3e12!6shttps:%2F%2Flh5.googleusercontent.com%2Fp%2FAF1QipMIvGehGur5uD9L-6jYweQhMKGngNPevK7_4aa_%3Dw160-h120-k-no!7i4624!8i3468!4m7!3m6!1s0x39eb188d6f95b9cd:0xc6ed340bfeea9e8d!8m2!3d27.7153242!4d85.2882376!10e5!16s%2Fg%2F11fk4cx1cw?entry=ttu";
+const folder = "swambumath";
+const cheerio = require("cheerio");
+const axios = require("axios");
 const fs = require("fs/promises");
-const readline = require("readline");
+const path = require("path");
+// Regular expression pattern to match URLs
+const urlRegex = /(https:\/\/lh5\.googleusercontent\.com\/p\/[^\s]+)/g;
 
-let base64Images;
-let folderName;
-
-// Create readline interface
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-
-// Prompt for the link and folder name
-rl.question("Enter the link to scrape images from: ", (link) => {
-  rl.question("Enter the folder name to save the images: ", (folder) => {
-    folderName = folder;
-    rl.close();
-
-    // Call scrapeData with the provided link
-    scrapeData(link)
-      .then(() => {
-        // Call saveImageToFile to save the images
-        saveImageToFile();
-      })
-      .catch((error) => {
-        console.error("Error scraping data:", error);
-      });
-  });
-});
-
-async function scrapeData(Link) {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.goto(Link);
-
-  // Extract data using JavaScript on the page
-  base64Images = await page.evaluate(() => {
-    const images = document.querySelectorAll("img");
-    const urls = Array.from(images).map((v) => v.src);
-    return urls;
-  });
-
-  await browser.close();
+// Function to extract valid URLs from the text
+function extractValidUrls(text) {
+  const matches = text.match(urlRegex);
+  return matches ? matches.map((url) => url.replace(/\\(.*)/g, "")) : [];
 }
+axios
+  .get(link) // Replace with your desired URL
+  .then((response) => {
+    const $ = cheerio.load(response.data);
+    // console.log(response.data);
+    fs.writeFile("index.html", response.data);
 
-function saveImageToFile() {
-  // Create folder if it doesn't exist
-  fs.mkdir(folderName, { recursive: true })
-    .then(() => {
-      // Extract image format from Base64 string
-      const filteredImages = base64Images.filter(
-        (urls) =>
-          urls.startsWith("data:image/jpeg;base64,") ||
-          urls.startsWith("data:image/png;base64,") ||
-          urls.startsWith("data:image/jpg;base64,") ||
-          urls.startsWith("data:image/gif;base64,")
-      );
-
-      filteredImages.forEach((image, index) => {
-        const fileName = Math.random().toString(10).substring(2, 15);
-        const imageFormat = image.split(";")[0].split("/")[1];
-        const imageData = image.replace(/^data:image\/\w+;base64,/, "");
-        const filePath = `./${folderName}/${fileName}.${imageFormat}`;
-
-        // Write Base64 image data to file
-        fs.writeFile(filePath, imageData, "base64")
-          .then(() => {
-            console.log(`Image file saved successfully: ${filePath}`);
-          })
-          .catch((err) => {
-            console.error(`Failed to save image file: ${err}`);
-          });
-      });
-    })
-    .catch((err) => {
-      console.error(`Failed to create folder: ${err}`);
+    // Extract valid URLs from the file contents
+    const validUrls = extractValidUrls(response.data);
+    validUrls.forEach(async (url) => {
+      const destination = Math.random().toString(10).substring(7) + ".jpg";
+      await downloadImage(url, `${folder}/${destination}`);
     });
+    // fs.writeFile("urls.txt", validUrls.join("\n"));
+  })
+  .catch((error) => {
+    console.log("Error fetching the page:", error.message);
+  });
+async function downloadImage(url, destination) {
+  try {
+    const response = await axios({
+      method: "GET",
+      url: url,
+      responseType: "arraybuffer",
+    });
+
+    if (response.status === 200) {
+      const filePath = path.resolve(__dirname, destination);
+      fs.writeFile(filePath, response.data);
+      console.log("Image downloaded successfully!");
+    } else {
+      console.error(
+        "Failed to download the image. Status code:",
+        response.status
+      );
+    }
+  } catch (error) {
+    console.error("Error downloading the image:", error.message);
+  }
 }
