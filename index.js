@@ -14,7 +14,6 @@ function extractValidUrls(text) {
   // return matches ? matches.map((url) => url.replace(/\\(.*)/g, "")) : [];
   return matches ? matches.map((url) => url.replace(/[\\=](.*)/g, "")) : [];
 }
-
 if (process.argv[3]) {
   folder = process.argv[3];
   if (!fs.existsSync(folder)) {
