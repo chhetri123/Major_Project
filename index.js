@@ -70,6 +70,8 @@ async function downloadImage(url, destination) {
     const response = await axios({
       method: "GET",
       url: url,
+timeout: 86400000,
+ maxContentLength:Infinity,
       responseType: "arraybuffer",
     });
 
