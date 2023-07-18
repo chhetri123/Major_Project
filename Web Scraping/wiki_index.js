@@ -3,7 +3,7 @@ const cheerio = require("cheerio");
 const fs = require("fs");
 const path = require("path");
 let folder;
-let delay = 50; // Initial delay in milliseconds between requests
+let delay = 5; // Initial delay in milliseconds between requests
 let retryAttempts = 0; // Number of retry attempts for a specific URL
 let count = 1;
 if (process.argv[2]) {
@@ -39,11 +39,12 @@ async function startDownloading(data) {
     })
     .get();
   // Extract valid URLs from the file contents
-
+console.log(imgUrls.length);
   fs.writeFileSync("wikiUrl.txt", imgUrls.join("\n"), "utf8");
   for (const url of imgUrls) {
     const destination = Math.random().toString(10).substring(7) + ".jpg";
     retryAttempts = 0; // Reset the retry attempts for each new URL
+    delay = 5
     await downloadImage(url, `${folder}/${destination}`);
   }
 }
