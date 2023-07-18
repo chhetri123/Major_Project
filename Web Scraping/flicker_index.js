@@ -42,12 +42,13 @@ async function startDownloading(data) {
       return extractUrl(link);
     })
     .get();
-  console.log(imgUrls);
+  console.log(imgUrls.length);
   // Extract valid URLs from the file contents
   fs.writeFileSync("flickerUrl.txt", imgUrls.join("\n"), "utf8");
   for (const url of imgUrls) {
     const destination = Math.random().toString(10).substring(7) + ".jpg";
     retryAttempts = 0; // Reset the retry attempts for each new URL
+    delay = 5
     await downloadImage(url, `${folder}/${destination}`);
   }
 }
