@@ -7,7 +7,7 @@ This project aims to develop a deep learning-based system for image captioning a
 To set up the project locally, follow these steps:
 
 1. Clone the repository:
-   This is code for webs scarping the images for our project to collect data
+   This is code for webs scarping the images for our project to collect data:
 
 ```js
 git clone  https://github.com/chhetri123/webscarping.git
