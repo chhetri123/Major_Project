@@ -1,6 +1,4 @@
-const link =
-  "https://www.google.com/maps/place/Swayambhunath,+Kathmandu+44600/@27.7153242,85.2882376,3a,75y,90t/data=!3m8!1e2!3m6!1sAF1QipMIvGehGur5uD9L-6jYweQhMKGngNPevK7_4aa_!2e10!3e12!6shttps:%2F%2Flh5.googleusercontent.com%2Fp%2FAF1QipMIvGehGur5uD9L-6jYweQhMKGngNPevK7_4aa_%3Dw160-h120-k-no!7i4624!8i3468!4m7!3m6!1s0x39eb188d6f95b9cd:0xc6ed340bfeea9e8d!8m2!3d27.7153242!4d85.2882376!10e5!16s%2Fg%2F11fk4cx1cw?entry=ttu";
-let folder = "";
+
 const cheerio = require("cheerio");
 const axios = require("axios");
 const fs = require("fs");
@@ -11,7 +9,6 @@ const urlRegex = /(https:\/\/lh5\.googleusercontent\.com\/p\/[^\s]+)/g;
 // Function to extract valid URLs from the text
 function extractValidUrls(text) {
   const matches = text.match(urlRegex);
-  // return matches ? matches.map((url) => url.replace(/\\(.*)/g, "")) : [];
   return matches ? matches.map((url) => url.replace(/[\\=](.*)/g, "")) : [];
 }
 if (process.argv[3]) {
@@ -24,7 +21,6 @@ if (process.argv[3]) {
   console.log("npm start file/link foldername");
 }
 if (process.argv[2] === "file") {
-  // console.log(process.argv[2]);
   downlaodFromFile();
 } else if (process.argv[2] === "link") {
   downloadFormLink();
@@ -51,10 +47,7 @@ function downlaodFromFile() {
   });
 }
 function startDownloading(data) {
-  // console.log(data);
   const $ = cheerio.load(data);
-  // console.log(response.data);
-  // fs.writeFileSync("index.html", data);
 
   // Extract valid URLs from the file contents
   const validUrls = extractValidUrls(data);
