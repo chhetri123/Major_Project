@@ -6,6 +6,7 @@ const path = require("path");
 // Regular expression pattern to match URLs
 const urlRegex = /(https:\/\/lh5\.googleusercontent\.com\/p\/[^\s]+)/g;
 
+
 // Function to extract valid URLs from the text
 function extractValidUrls(text) {
   const matches = text.match(urlRegex);
@@ -18,27 +19,12 @@ if (process.argv[3]) {
   }
 } else {
   console.log("Please provide valid command");
-  console.log("npm start file/link foldername");
+  console.log("npm start file foldername");
 }
 if (process.argv[2] === "file") {
   downlaodFromFile();
-} else if (process.argv[2] === "link") {
-  downloadFormLink();
-} else {
-  console.log("Please provide valid command");
-  console.log("npm start file/link foldername");
 }
 
-function downloadFormLink() {
-  axios
-    .get(link) // Replace with your desired URL
-    .then((response) => {
-      startDownloading(response.data);
-    })
-    .catch((error) => {
-      console.log("Error fetching the page:", error.message);
-    });
-}
 function downlaodFromFile() {
   console.log("file");
   fs.readFile("index.txt", "utf8", function (err, data) {
