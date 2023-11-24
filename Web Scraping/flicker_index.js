@@ -86,7 +86,7 @@ async function downloadImage(url, destination) {
         console.log(
           `Received 429 status. Retrying in ${delay} milliseconds...`
         );
-        await downloadImage(url, destination); // Retry the request
+        await downloadImage(url, destination); 
       } else {
         console.error("Exceeded maximum retry attempts for the URL:", url);
       }
