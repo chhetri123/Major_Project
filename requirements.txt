@@ -1,0 +1,15 @@
+ipywidgets
+matplotlib
+numpy==1.24.2
+pandas
+torch==1.12.1
+torchvision==0.13.1
+tqdm==4.64.0
+pickle
+tensorflow
+opencv-python
+glob
+nltk.translate.bleu_score
+sentencepiece
+PyICU
+keras
