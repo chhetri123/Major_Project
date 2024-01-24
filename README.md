@@ -2,6 +2,11 @@
 
 This project aims to develop a deep learning-based system for image captioning and classification in both Nepali and English languages. The system will take an input image and generate descriptive captions in both languages, while also classifying the image into relevant categories. The project leverages state-of-the-art deep learning models and techniques to achieve accurate and meaningful results.
 
+**Datsests**
+- Stanford (19551 images with caption) data is collected from kaggle, later converted into nepali text with the help of google API and mannual correction is done.
+- Around 1000 images with nepali captions are written manually.
+  
+
 ## Setup Instructions
 
 To set up the project locally, follow these steps:
