@@ -1,68 +1,39 @@
 from flask import Flask, request, jsonify
-# from flask import Flask, render_template,request
 import cv2
 from keras.models import load_model
 import numpy as np
-from keras.applications import ResNet50
+from keras.applications import ResNet152
 from keras.optimizers import Adam
-from keras.layers import Dense, Flatten,Input, Convolution2D, Dropout, LSTM, TimeDistributed, Embedding, Bidirectional, Activation, RepeatVector,Concatenate
 from keras.models import Sequential, Model
 from keras.utils import to_categorical
 from keras.preprocessing import image, sequence
 import cv2
 from keras_preprocessing.sequence import pad_sequences
 from tqdm import tqdm
+import pickle
+import tensorflow as tf
 # from keras.applications.Resnet50 import preprocess_input
 from flask_cors import CORS
 
 from keras.applications import ResNet50
-resnet = ResNet50(include_top=False, weights='imagenet',input_shape=(224,224,3), pooling='avg')
+# 
 
-print("="*50)
-print("resnet loaded")
+incept_model = ResNet152(weights='imagenet', include_top=True)
+last = incept_model.layers[-2].output
+ResNet152Model= Model(inputs = incept_model.input,outputs = last)
 
-# resnet = load_model('resnet.h5')
-
-vocab = np.load('vocab.npy', allow_pickle=True)               
-# vocab = np.load('vocab1.npy', allow_pickle=True)        #---------------- Changes
-
-vocab = vocab.item()
-
-inv_vocab = {v:k for k,v in vocab.items()}
-
-embedding_size = 128
-max_len = 40                      
-# max_len = 36                            #---------------- Changes
-vocab_size = len(vocab)
-
-image_model = Sequential()
-
-image_model.add(Dense(embedding_size, input_shape=(2048,), activation='relu'))
-image_model.add(RepeatVector(max_len))
+with open("pickle_files/words_dict.pkl","rb") as f:
+    words_dict=pickle.load(f)
 
 
-language_model = Sequential()
-
-language_model.add(Embedding(input_dim=vocab_size, output_dim=embedding_size, input_length=max_len))
-language_model.add(LSTM(256, return_sequences=True))
-language_model.add(TimeDistributed(Dense(embedding_size)))
+vocab_size = len(words_dict)+1
+MAX_LEN = 192
+inv_dict = {v:k for k, v in words_dict.items()}
 
 
-conca = Concatenate()([image_model.output, language_model.output])
-x = LSTM(128, return_sequences=True)(conca)
-x = LSTM(512, return_sequences=False)(x)
-x = Dense(vocab_size)(x)
-out = Activation('softmax')(x)
-model = Model(inputs=[image_model.input, language_model.input], outputs = out)
-
-# model.load_weights("../input/model_weights.h5")
-model.compile(loss='categorical_crossentropy', optimizer='RMSprop', metrics=['accuracy'])
-
-model.load_weights('mine_model_weights.h5')
-# model.load_weights('model_weights.h5')                     #---------------- Changes
-
-print("="*50)
+model = tf.keras.models.load_model('models/LSTM/lstm_model.h5')
 print("model loaded")
+
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 1
@@ -78,50 +49,35 @@ def after():
 
     file.save('static/file.jpg')
     img = cv2.imread('static/file.jpg')
+    img = cv2.imread(img_path)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    img = cv2.resize(img,(224,224,))                    # diff
-    img = np.reshape(img,(1,224,224,3))
+    img = cv2.resize(img, (224,224))
+    img = img.reshape(1,224,224,3)
+    img=ResNet152Model.predict(img_resized).reshape(2048,)
 
-    # img = image.load_img(file, target_size=(224, 224))
-    # x = image.img_to_array(img)
-    # x = np.expand_dims(x, axis=0)
-    # x = preprocess_input(x)   # ----- doubt
-
-    features = resnet.predict(img).reshape(1,2048)
-
-    print("="*50)
-    print("Predict Features")
-
-
-    text_in = ['startofseq']
-
-    final = ''
-
-    print("="*50)
-    print("GETING Captions")
-
+    text_inp = ['startofseq']
     count = 0
-    while tqdm(count < 20):
-
+    caption = ''
+    while count < MAX_LEN:
         count += 1
-
         encoded = []
-        for i in text_in:
-            encoded.append(vocab[i])
+        encoded = [words_dict.get(word, len(words_dict) - 1) for word in text_inp]  # Convert words to indices, using index for '<end>' for unknown words
+        encoded = pad_sequences([encoded], padding='post', truncating='post', maxlen=MAX_LEN)[0]  # Pad sequences
 
-        padded = pad_sequences([encoded], maxlen=max_len, padding='post', truncating='post').reshape(1,max_len)
+        data_list = [test_img_resized.reshape(1, -1), encoded.reshape(1, -1)]  # Reshape encoded
+        prediction = np.argmax(model.predict(data_list))
+        prediction = np.argmax(model.predict(data_list))
+        sampled_word = inv_dict[prediction]
+        caption = caption + ' ' + sampled_word
 
-        sampled_index = np.argmax(model.predict([features, padded]))
+        if sampled_word == 'endofseq':
+            break
+        text_inp.append(sampled_word)
 
-        sampled_word = inv_vocab[sampled_index]
+    caption= caption.replace('endofseq','')
+    print(caption.replace(' .','.'))
 
-        if sampled_word != 'endofseq':
-            final = final + ' ' + sampled_word
-
-        text_in.append(sampled_word)
-
-
-    return jsonify({'caption': final})
+    return jsonify({'caption': caption.replace(' .','.')})
 
 
 if __name__ == "__main__":
