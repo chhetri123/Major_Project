@@ -44,16 +44,25 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route('/after', methods=['POST'])
 def after():
-    global model,vocab,inv_vocab 
+
+    if 'file' not in request.files:
+        return 'No file part'
+
     file = request.files['file']
 
+    if file.filename == '':
+        return 'No selected file'
+
+    # Save the file
+   
     file.save('static/file.jpg')
+
+    # Read the saved file
     img = cv2.imread('static/file.jpg')
-    img = cv2.imread(img_path)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = cv2.resize(img, (224,224))
     img = img.reshape(1,224,224,3)
-    img=ResNet152Model.predict(img_resized).reshape(2048,)
+    test_img_resized=ResNet152Model.predict(img).reshape(2048,)
 
     text_inp = ['startofseq']
     count = 0
