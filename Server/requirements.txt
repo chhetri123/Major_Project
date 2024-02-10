@@ -8,3 +8,4 @@ flask-cors
 Werkzeug==2.0.2
 tensorflow
 keras_preprocessing==1.1.2
+nltk==3.6.5
