@@ -17,12 +17,49 @@ from flask_cors import CORS
 
 from keras.applications import ResNet50
 # 
+# Transformer 
+from library.prediction import evaluate_single_image
+from  library.transformer import Transformer
+from library.customSchedule import learning_rate
+
+top_k = 25000
+num_layer = 4
+d_model = 512
+dff = 2048
+num_heads = 8
+row_size = 8
+col_size = 8
+target_vocab_size = top_k + 1
+dropout_rate = 0.1
+
+
+loaded_transformer = Transformer(num_layer, d_model, num_heads, dff, row_size, col_size,
+                                 target_vocab_size, max_pos_encoding=target_vocab_size,
+                                 rate=dropout_rate)
+
+# Load the weights into the model
+loaded_transformer.load_weights('models/Transformer/model-80')
+# Use the loaded custom objects
+loaded_transformer.compile(optimizer=tf.keras.optimizers.Adam(learning_rate))
+print("Trasformer model loaded successfully")
+# loaded_transformer.compile(optimizer=tf.keras.optimizers.Adam(learning_rate), loss=train_loss.result(), metrics=[train_accuracy])
+global tokenizer
+with open('pickle_files/transformer/tokenizer.pickle', 'rb') as handle:
+    tokenizer = pickle.load(handle)
+    tokenizer.word_index['<pad>'] = 0
+    tokenizer.index_word[0] = '<pad>'
+
+
+print("Tokenizer  loaded successfully")
+
+# 
+
 
 incept_model = ResNet152(weights='imagenet', include_top=True)
 last = incept_model.layers[-2].output
 ResNet152Model= Model(inputs = incept_model.input,outputs = last)
 
-with open("pickle_files/words_dict.pkl","rb") as f:
+with open("pickle_files/lstm/words_dict.pkl","rb") as f:
     words_dict=pickle.load(f)
 
 
@@ -32,7 +69,7 @@ inv_dict = {v:k for k, v in words_dict.items()}
 
 
 model = tf.keras.models.load_model('models/LSTM/lstm_model.h5')
-print("model loaded")
+print("LSTM model  loaded successfully")
 
 
 app = Flask(__name__)
@@ -41,6 +78,25 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 # @app.route('/')
 # def index(): 
 #     return render_template('index.html')
+
+
+@app.route('/tranformer',methods=['POST'])
+def tranformer():
+    if 'file' not in request.files:
+        return 'No file part'
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return 'No selected file'
+
+    # Save the file
+   
+    file.save('static/file.jpg')
+    caption=evaluate_single_image("static/file.jpg",tokenizer,loaded_transformer)
+    print(caption)
+    return jsonify({'caption': caption})
+
 
 @app.route('/after', methods=['POST'])
 def after():
