@@ -7,6 +7,9 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color: black !important;
+  overflow-x: hidden;
+  height: 100vh;
 }
 
 code {
@@ -16,7 +19,7 @@ code {
 
 .imgcss {
   border: 2px solid black;
-  width: 35rem;
+  /* width: 35rem;/ */
 }
 
 .divtop {
@@ -29,11 +32,60 @@ code {
 .div1 {
   display: flex;
   flex-direction: row;
+  margin:0;
+  padding:0;
+  width:88%;
 }
 
 .rightbar {
   margin: 50px;
+  margin-right: 110px;
+  
 
+}
+.leftbar {
+  margin: 50px;
+  width:45%;
+}
+
+.image-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.image-wrapper {
+  position: relative;
+  width: 48%;
+  margin-bottom: 10px;
+}
+
+.image {
+  width: 100%; /* Adjust the width to make the image smaller */
+  max-width: 100%; /* Ensure the image doesn't exceed its container's width */
+  border-radius: 3px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.image:hover {
+  transform: scale(1.06);
+}
+
+.selected {
+  border: 3px solid #2ecc71;
+}
+
+.tick {
+  position: absolute;
+  top: 0.8%;
+  left: 50%;
+  width: 10%;
+  transform: translateX(-50%);
+  font-size: 24px;
+  color: whitesmoke;
+  background-color: #008CBA;
+  border-radius: 50%;
 }
 
 .heading {
@@ -100,7 +152,7 @@ code {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 80%;
+  width: 90%;
   max-width: 42rem;
   height: auto;
   padding: 20px;
@@ -131,11 +183,30 @@ code {
 }
 
 .result-caption {
+  margin: 10px 0px 10px 0px;
+  padding:3px;
   font-weight: bold;
-  font-size: 18px;
+  font-size: 14px;
   color: black;
+  text-align: left;
 }
 
+
+/* .clipboard_container {
+  position: relative;
+  width: 100%;
+  text-align: left;
+  border: 1px solid #ccc;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+} */
+
+
+
+.error{
+  color:red
+}
 .text-to-speech-btn {
   background-color: #4CAF50;
   color: white;
