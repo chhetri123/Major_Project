@@ -1,102 +1,162 @@
 import React, { useState, useEffect } from "react";
 
-import "../index.css"
+import "../index.css";
 // import Topbar from "./Topbar";
 import Topbar from "../Topbar";
 // import back2 from "./background/back2.jpg"
-import back2 from "../background/back2.jpg"
+import back2 from "../background/back2.jpg";
 import Result from "./Result";
 import Loader from "./Loader";
+import LeftBar from "./leftbar";
 // BHushan
 
-
 const ImageCaptionGenerator = () => {
+  const [selectedFile, setSelectedFile] = useState("");
+  const [selectedModel, setSelectedModel] = useState("LSTM");
+  const [preview, setPreview] = useState("");
+  const [bool, setBool] = useState(false);
+  const [testImage, setTestImage] = useState(null);
+  const [name, setName] = useState("");
+  const handleTestImage = (data) => {
+    setTestImage(data);
+  };
 
-    const [selectedFile, setSelectedFile] = useState("");
-    // const [selectedFile, setSelectedFile] = useState("No file choosen");
-    const [preview, setPreview] = useState("");
-    const [bool, setBool] = useState(false);
+  const handleImageChange = (event) => {
+    // const img = event.target.files[0].name;
+    const img = event.target.files[0];
 
-    const [name, setName] = useState("");
+    setSelectedFile(img);
+  };
 
-    const handleImageChange = (event) => {
-        // const img = event.target.files[0].name;
-        const img = event.target.files[0];
-        setSelectedFile(img);
-    };
+  const handleSelect = (value) => {
+    setSelectedModel(value);
+  };
 
-    const handleGenerateCaption = (event) => {
-
-        if (selectedFile)
-            setBool(true);
-        else {
-            window.alert("Select image first");
-        }
-
-    };
-
-    const fetchUser = async () => {
-        const url = `http://localhost:8000/fetchnotes`;
-        const response = await fetch(url, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "token": localStorage.getItem('token')
-            }
-        });
-
-        const json = await response.json();
-        console.log('Ithe user json ', json);
-        setName(json.firstname);
+  const handleGenerateCaption = async (event) => {
+    if (testImage) {
+      const response = await fetch(testImage);
+      const blob = await response.blob();
+      const file = new File([blob], "test.jpg", { type: blob.type });
+      setSelectedFile(file);
+      setBool(true);
+    } else if (selectedFile) {
+      setBool(true);
+    } else {
+      window.alert("Select image first");
     }
+  };
 
-    useEffect(() => {
-        if (localStorage.getItem('token')) {
-            fetchUser();
-        }
-    }, []);
+  const fetchUser = async () => {
+    const url = `http://localhost:8000/fetchnotes`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        token: localStorage.getItem("token"),
+      },
+    });
 
-    return (
-        <>
-            <div>
+    const json = await response.json();
+    setName(json.firstname);
+  };
 
-                {!bool && <div className="divtop" style={{ backgroundImage: `url(${back2})`, backgroundRepeat: "no-repeat", backgroundSize: "contain", height: 770, width: 1320 }}>
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      fetchUser();
+    }
+  }, []);
 
-                    <Topbar />
-                    <div className="div1">
-                        <div className="rightbar">
+  return (
+    <>
+      <div>
+        {!bool && (
+          <div
+            className="divtop"
+            style={{
+              backgroundImage: `url(${back2})`,
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "contain",
+              height: 770,
+              width: "100%",
+              overflowY: "hidden",
+            }}
+          >
+            <Topbar />
+            <div className="div1">
+              <div className="rightbar">
+                {localStorage.getItem("token") ? (
+                  <h1 className="heading">Hello {name}</h1>
+                ) : (
+                  <h1 className="heading">Welcome to AI Sites</h1>
+                )}
 
-                            {localStorage.getItem('token') ?
+                <h5 style={{ color: "black", fontSize: "16px" }}>
+                  Let Images Speak <br />
+                  Upload an Image to Generate Captivating Captions!
+                </h5>
 
-                                <h1 className="heading" >Hello {name}</h1> :
-                                <h1 className="heading">
-                                    Welcome to VocPix
-                                </h1>
-                            }
+                <input
+                  type="file"
+                  style={{ color: "black" }}
+                  onChange={handleImageChange}
+                />
 
-                            <h5 style={{ color: 'black', fontSize: "16px" }}>Let Images Speak <br />Upload an Image to Generate Captivating Captions!</h5>
+                <div className="imgdiv">
+                  {preview && (
+                    <img className="imgcss" src={preview} alt="image" />
+                  )}
+                </div>
 
-                           
+                <div
+                  style={{
+                    color: "black",
+                    fontSize: "16px",
+                    marginTop: "10px",
+                  }}
+                >
+                  <h3>Select any one Model</h3>
+                  <div>
+                    <label>
+                      <input
+                        type="radio"
+                        name="valueSelector"
+                        value="LSTM"
+                        checked={selectedModel === "LSTM"}
+                        onChange={() => handleSelect("LSTM")}
+                      />
+                      LSTM model
+                    </label>
 
-                            <input type="file" style={{color:"black"}} onChange={handleImageChange} />
-
-                            <div className="imgdiv">
-                                {preview && <img className="imgcss" src={preview} alt="image" />}
-                            </div>
-                            
-                            <div>
-                                
-                                <button className="btnGenerate" onClick={handleGenerateCaption}>Generate Caption</button>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>}
-
-                {bool && <Result img={selectedFile} />}
+                    <label style={{ marginLeft: "15px" }}>
+                      <input
+                        type="radio"
+                        name="valueSelector"
+                        value="TRANFORMER"
+                        checked={selectedModel === "TRANFORMER"}
+                        onChange={() => handleSelect("TRANFORMER")}
+                      />
+                      TRANFORMER model
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <button
+                    className="btnGenerate"
+                    onClick={handleGenerateCaption}
+                  >
+                    Generate Caption
+                  </button>
+                </div>
+              </div>
+              <LeftBar onDataFromUser={handleTestImage} />
             </div>
-        </>
-    );
+          </div>
+        )}
+
+        {bool && <Result img={selectedFile} model={selectedModel} />}
+      </div>
+    </>
+  );
 };
 
 export default ImageCaptionGenerator;
