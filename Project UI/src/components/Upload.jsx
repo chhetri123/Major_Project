@@ -87,7 +87,7 @@ const ImageCaptionGenerator = () => {
                 {localStorage.getItem("token") ? (
                   <h1 className="heading">Hello {name}</h1>
                 ) : (
-                  <h1 className="heading">Welcome to AI Sites</h1>
+                  <h1 className="heading">Welcome to NextWorld</h1>
                 )}
 
                 <h5 style={{ color: "black", fontSize: "16px" }}>
