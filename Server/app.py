@@ -100,7 +100,7 @@ print("LSTM model  loaded successfully")
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 1
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
-# @app.route('/')
+# @app.route('/')to 
 # def index(): 
 #     return render_template('index.html')
 

@@ -8,7 +8,6 @@ import TransButton from "./TransButton";
 import Upload from "./Upload";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-// import "../topbar.css";
 
 const Result = (props) => {
   const [preview, setPreview] = useState();
