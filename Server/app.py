@@ -60,14 +60,20 @@ print("Tokenizer  loaded successfully")
 # 
 
 ResNet152Model=ResNet152(include_top=False, weights='imagenet',input_shape=(224,224,3), pooling='avg')
-with open("pickle_files/lstm/words_dict_nepali_sc.pkl","rb") as f:
+with open("pickle_files/lstm/words_dict_nepali_sc_40.pkl","rb") as f:
     words_dict=pickle.load(f)
 
+    # words_dict_nepali_sc_40.pkl
+vocab_size=6039  # 40 epoch all data
+
+
+# # MAX_LEN=192
+MAX_LEN=211 # 40 epoch all data
 
 # vocab_size = len(words_dict)+1
-vocab_size = 5521
+# vocab_size = 5521
 # MAX_LEN = 192
-MAX_LEN=210
+# MAX_LEN=210
 inv_dict = {v:k for k, v in words_dict.items()}
 
 
@@ -92,7 +98,7 @@ outputs = Dense(vocab_size, activation='softmax')(decoder2)
 model = Model(inputs=[inputs1, inputs2], outputs=outputs)
 # compile model
 model.compile(loss='categorical_crossentropy', optimizer='adam',metrics=['accuracy'])
-model.load_weights("models/LSTM/resnet152_lstm_model_weights_50epoch.h5")
+model.load_weights("models/LSTM/resnet152_lstm_model_weights_40epoch.h5")
 #
 print("LSTM model  loaded successfully")
 
