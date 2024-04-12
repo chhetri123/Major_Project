@@ -12,7 +12,7 @@ The advent of deep neural networks has made the image captioning task more feasi
   - LSTM
     - RESNET152 ( For Feature Extraction)
   - Transformer
-    - Inception-V3 ( For encoder)
+    - Inception-V3 ( For Feature Extraction)
 - Frontend ( `/Projet UI`)
   - React
   - axios
